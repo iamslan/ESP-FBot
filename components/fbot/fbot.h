@@ -133,6 +133,7 @@ class Fbot : public esphome::ble_client::BLEClientNode, public Component {
   void update_connected_state(bool state);
   void reset_sensors_to_unknown();
   void check_poll_timeout();
+  void update_switches_availability(bool available);
 };
 
 }  // namespace fbot

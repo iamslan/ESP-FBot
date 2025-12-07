@@ -22,6 +22,9 @@ void Fbot::setup() {
   if (this->connected_binary_sensor_ != nullptr) {
     this->connected_binary_sensor_->publish_state(false);
   }
+  
+  // Disable switches initially (device not connected)
+  this->update_switches_availability(false);
 }
 
 void Fbot::loop() {
@@ -313,6 +316,9 @@ void Fbot::update_connected_state(bool state) {
   if (this->connected_binary_sensor_ != nullptr) {
     this->connected_binary_sensor_->publish_state(state);
   }
+  
+  // Enable/disable switches based on connection state
+  this->update_switches_availability(state);
 }
 
 // Control methods
@@ -333,30 +339,40 @@ void Fbot::control_light(bool state) {
 }
 
 void Fbot::check_poll_timeout() {
-  // Only check timeout if we've started polling and are connected
-  if (this->last_poll_time_ == 0 || !this->connected_ || !this->characteristics_discovered_) {
+  // Only check timeout if we've started polling
+  if (this->last_poll_time_ == 0) {
+    return;
+  }
+  
+  // Don't check if we've already hit max failures
+  if (this->consecutive_poll_failures_ >= MAX_POLL_FAILURES) {
     return;
   }
   
   uint32_t now = millis();
-  uint32_t time_since_last_poll = now - this->last_poll_time_;
   uint32_t time_since_success = (this->last_successful_poll_ > 0) ? (now - this->last_successful_poll_) : 0;
   
   // Check if we've exceeded the timeout period since last successful poll
   if (this->last_successful_poll_ > 0 && time_since_success > POLL_TIMEOUT_MS) {
-    // Increment failure counter
-    this->consecutive_poll_failures_++;
+    // Increment failure counter only once per timeout period
+    uint32_t time_since_poll = now - this->last_poll_time_;
     
-    ESP_LOGW(TAG, "Poll timeout detected (failure %d/%d)", this->consecutive_poll_failures_, MAX_POLL_FAILURES);
-    
-    // Reset the last_successful_poll to prevent repeated increments
-    this->last_successful_poll_ = now;
-    
-    // Check if we've reached the maximum failures
-    if (this->consecutive_poll_failures_ >= MAX_POLL_FAILURES) {
-      ESP_LOGE(TAG, "Max poll failures reached - marking as disconnected and resetting sensors");
-      this->reset_sensors_to_unknown();
-      this->update_connected_state(false);
+    // Only count as a new failure if it's been at least polling_interval since last poll attempt
+    if (time_since_poll >= this->polling_interval_) {
+      this->consecutive_poll_failures_++;
+      
+      ESP_LOGW(TAG, "Poll timeout detected (failure %d/%d)", this->consecutive_poll_failures_, MAX_POLL_FAILURES);
+      
+      // Update last_successful_poll to now plus timeout, so we wait another full timeout period
+      // before incrementing again
+      this->last_successful_poll_ = now;
+      
+      // Check if we've reached the maximum failures
+      if (this->consecutive_poll_failures_ >= MAX_POLL_FAILURES) {
+        ESP_LOGE(TAG, "Max poll failures reached - marking as disconnected and resetting sensors");
+        this->reset_sensors_to_unknown();
+        this->update_connected_state(false);
+      }
     }
   }
 }
@@ -394,6 +410,38 @@ void Fbot::reset_sensors_to_unknown() {
   }
   if (this->light_active_binary_sensor_ != nullptr) {
     this->light_active_binary_sensor_->publish_state(false);
+  }
+}
+
+void Fbot::update_switches_availability(bool available) {
+  // Enable or disable all switches based on connection availability
+  if (this->usb_switch_ != nullptr) {
+    if (available) {
+      this->usb_switch_->set_disabled_by_default(false);
+    } else {
+      this->usb_switch_->set_disabled_by_default(true);
+    }
+  }
+  if (this->dc_switch_ != nullptr) {
+    if (available) {
+      this->dc_switch_->set_disabled_by_default(false);
+    } else {
+      this->dc_switch_->set_disabled_by_default(true);
+    }
+  }
+  if (this->ac_switch_ != nullptr) {
+    if (available) {
+      this->ac_switch_->set_disabled_by_default(false);
+    } else {
+      this->ac_switch_->set_disabled_by_default(true);
+    }
+  }
+  if (this->light_switch_ != nullptr) {
+    if (available) {
+      this->light_switch_->set_disabled_by_default(false);
+    } else {
+      this->light_switch_->set_disabled_by_default(true);
+    }
   }
 }
 
