@@ -1,6 +1,6 @@
-# ESP-Home FBot Battery Component
+# ESP-Home Battery Component for FOSSiBOT, SYDPOWER and AFERIY Batteries
 
-** THIS IS DEVELOPMENT CODE, NOT TESTED YET ***
+![ESP-FBot Image](https://github.com/Ylianst/ESP-IQ2020/assets/1319013/0ba0a473-8653-4b65-8338-052c8237fb5b)
 
 This is a HomeAssistant, ESP-Home custom component for locally monitoring and controlling battery systems via Bluetooth. Should work with the following batteries:
 
@@ -27,6 +27,14 @@ Basically, any power station that works with the "BrightEMS" application. You no
 - A compatible battery that makes use of the "BrightEMS" application. You do not need to pair the battery to WIFI.
 - The ESP32 device will need to be within range of the battery (typically 10-30 feet)
 
+## Getting the MAC address
+
+Before you install this integration, you will need to get the Bluetooth LE MAC address of your battery. You need to search for a Bluetooth LE device that starts with the name "FOSSIBOT" and "POWER".
+
+- On Windows, use [BluetoothLEView](https://www.nirsoft.net/utils/bluetooth_low_energy_scanner.html)
+
+The MAC address will look like "A1:B2:C3:D4:E5:F6".
+
 ## Installation
 
 1. Use the example configuration file `fbot-example.yaml` as a starting point.
@@ -35,36 +43,60 @@ Basically, any power station that works with the "BrightEMS" application. You no
 
 ## Configuration
 
-### Sensors
+Here is a ESP-Home configuration you can use. Make sure to put your own API and OTA keys and fill in the Bluetooth LE MAC address of your power station. 
 
-All sensors are optional. Include only the ones you need:
-
-```yaml
-sensor:
-  - platform: fbot
-    fbot_id: my_fbot
-    battery_level:
-      name: "Battery Level"
-    input_power:
-      name: "Input Power"
-    output_power:
-      name: "Output Power"
-    system_power:
-      name: "System Power"
-    total_power:
-      name: "Total Power"
-    remaining_time:
-      name: "Remaining Time"
-```
-
-### Binary Sensors
+<details>
+<summary>Sample ESP-Home configuration file</summary>
 
 ```yaml
+esphome:
+  name: bigbattery
+  friendly_name: Big Battery
+  comment: "AFERIY 3840Wh Portable Power Station"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "(PLACE YOU KEY HERE)"
+
+ota:
+  - platform: esphome
+    password: "(PLACE YOU KEY HERE)"
+
+# This assumed you put your WIFI SSID and passing in the secrets file
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Enable logging
+logger:
+  level: WARN
+
+# Load external component from local path
+external_components:
+  - source: github://ylianst/esp-fbot
+    refresh: 10s
+
+# BLE Client configuration
+ble_client:
+  - mac_address: "AA:BB:CC:DD:EE:FF"  # Replace with your Fossibot MAC address
+
+# Configure the Fbot component. This component will inherit the ble_client above.
+fbot:
+  id: my_fbot
+  polling_interval: 5s  # How often to poll for updates (default: 2s)
+
+# Binary sensors for connection and output states
 binary_sensor:
   - platform: fbot
     fbot_id: my_fbot
     connected:
-      name: "Fbot Connected"
+      name: "Connected"
     usb_active:
       name: "USB Active"
     dc_active:
@@ -73,20 +105,73 @@ binary_sensor:
       name: "AC Inverter Active"
     light_active:
       name: "Light Active"
-```
 
-### Switches
+# Sensors for battery and power readings
+sensor:
+  - platform: fbot
+    fbot_id: my_fbot
+    battery_level:
+      name: "Battery"
+      id: battery_percent
+    input_power:
+      name: "Input Power"
+      id: input_watts
+    output_power:
+      name: "Output Power"
+      id: output_watts
+    system_power:
+      name: "System Power"
+      id: system_watts
+    total_power:
+      name: "Total Power"
+      id: total_watts
+    remaining_time:
+      name: "Remaining Minutes"
+      id: remaining_minutes
+  # Convert remaining time from minutes to hours
+  - platform: template
+    name: "Remaining Hours"
+    lambda: |-
+      if (id(remaining_minutes).has_state()) {
+        return id(remaining_minutes).state / 60.0;
+      }
+      return 0.0;
+    unit_of_measurement: "h"
+    accuracy_decimals: 1
+    device_class: duration
+    state_class: measurement
+    update_interval: 5s
 
-```yaml
+  # Net power (positive = charging, negative = discharging)
+  - platform: template
+    name: "Net Power"
+    lambda: |-
+      if (id(input_watts).has_state() && id(output_watts).has_state()) {
+        return id(input_watts).state - id(output_watts).state;
+      }
+      return 0.0;
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+    device_class: power
+    state_class: measurement
+    update_interval: 5s
+
+# Switches to control outputs
 switch:
   - platform: fbot
     fbot_id: my_fbot
     usb:
       name: "USB Output"
+      id: usb_switch
     dc:
       name: "DC Output"
+      id: dc_switch
     ac:
       name: "AC Inverter"
+      id: ac_switch
     light:
       name: "Light"
+      id: light_switch
 ```
+
+</details>
