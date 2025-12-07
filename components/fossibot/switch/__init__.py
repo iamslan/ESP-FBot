@@ -2,16 +2,16 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
 from esphome.const import CONF_ID, CONF_ICON
-from .. import fossibot_ns, Fossibot, CONF_FOSSIBOT_ID
+from .. import fbot_ns, Fbot, CONF_FBOT_ID
 
-DEPENDENCIES = ["fossibot"]
+DEPENDENCIES = ["fbot"]
 
 CONF_USB = "usb"
 CONF_DC = "dc"
 CONF_AC = "ac"
 CONF_LIGHT = "light"
 
-FossibotSwitch = fossibot_ns.class_("FossibotSwitch", switch.Switch, cg.Component)
+FbotSwitch = fbot_ns.class_("FbotSwitch", switch.Switch, cg.Component)
 
 SWITCH_TYPES = {
     CONF_USB: "usb",
@@ -22,28 +22,28 @@ SWITCH_TYPES = {
 
 CONFIG_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(CONF_FOSSIBOT_ID): cv.use_id(Fossibot),
+        cv.GenerateID(CONF_FBOT_ID): cv.use_id(Fbot),
         cv.Optional(CONF_USB): switch.switch_schema(
-            FossibotSwitch,
+            FbotSwitch,
             icon="mdi:usb-port",
         ),
         cv.Optional(CONF_DC): switch.switch_schema(
-            FossibotSwitch,
+            FbotSwitch,
             icon="mdi:power-socket-de",
         ),
         cv.Optional(CONF_AC): switch.switch_schema(
-            FossibotSwitch,
+            FbotSwitch,
             icon="mdi:power-plug",
         ),
         cv.Optional(CONF_LIGHT): switch.switch_schema(
-            FossibotSwitch,
+            FbotSwitch,
             icon="mdi:lightbulb",
         ),
     }
 )
 
 async def to_code(config):
-    parent = await cg.get_variable(config[CONF_FOSSIBOT_ID])
+    parent = await cg.get_variable(config[CONF_FBOT_ID])
     
     for key, switch_type in SWITCH_TYPES.items():
         if key in config:

@@ -14,9 +14,9 @@ from esphome.const import (
     UNIT_KILOWATT_HOURS,
     UNIT_MINUTE,
 )
-from . import fossibot_ns, Fossibot, CONF_FOSSIBOT_ID
+from . import fbot_ns, Fbot, CONF_FBOT_ID
 
-DEPENDENCIES = ["fossibot"]
+DEPENDENCIES = ["fbot"]
 
 CONF_INPUT_POWER = "input_power"
 CONF_OUTPUT_POWER = "output_power"
@@ -27,7 +27,7 @@ CONF_REMAINING_TIME = "remaining_time"
 
 CONFIG_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(CONF_FOSSIBOT_ID): cv.use_id(Fossibot),
+        cv.GenerateID(CONF_FBOT_ID): cv.use_id(Fbot),
         cv.Optional(CONF_BATTERY_LEVEL): sensor.sensor_schema(
             unit_of_measurement=UNIT_PERCENT,
             accuracy_decimals=1,
@@ -74,7 +74,7 @@ CONFIG_SCHEMA = cv.Schema(
 )
 
 async def to_code(config):
-    parent = await cg.get_variable(config[CONF_FOSSIBOT_ID])
+    parent = await cg.get_variable(config[CONF_FBOT_ID])
     
     if CONF_BATTERY_LEVEL in config:
         sens = await sensor.new_sensor(config[CONF_BATTERY_LEVEL])

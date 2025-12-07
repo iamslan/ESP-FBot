@@ -1,24 +1,24 @@
-#include "fossibot_switch.h"
+#include "fbot_switch.h"
 #include "esphome/core/log.h"
 
 #ifdef USE_ESP32
 
 namespace esphome {
-namespace fossibot {
+namespace fbot {
 
-static const char *const TAG = "fossibot.switch";
+static const char *const TAG = "fbot.switch";
 
-void FossibotSwitch::setup() {
+void FbotSwitch::setup() {
   // Switches start in unknown state
   this->state = false;
 }
 
-void FossibotSwitch::dump_config() {
-  LOG_SWITCH("", "Fossibot Switch", this);
+void FbotSwitch::dump_config() {
+  LOG_SWITCH("", "Fbot Switch", this);
   ESP_LOGCONFIG(TAG, "  Type: %s", this->switch_type_.c_str());
 }
 
-void FossibotSwitch::write_state(bool state) {
+void FbotSwitch::write_state(bool state) {
   if (this->parent_ == nullptr) {
     ESP_LOGW(TAG, "No parent set for switch");
     return;
@@ -43,7 +43,7 @@ void FossibotSwitch::write_state(bool state) {
   this->publish_state(state);
 }
 
-}  // namespace fossibot
+}  // namespace fbot
 }  // namespace esphome
 
 #endif  // USE_ESP32

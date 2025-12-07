@@ -12,7 +12,7 @@
 #include <esp_gattc_api.h>
 
 namespace esphome {
-namespace fossibot {
+namespace fbot {
 
 // BLE Service and Characteristic UUIDs
 static const char *const SERVICE_UUID = "0000a002-0000-1000-8000-00805f9b34fb";
@@ -31,7 +31,7 @@ static const uint16_t STATE_DC_BIT = 1024;   // bit 10
 static const uint16_t STATE_AC_BIT = 2048;   // bit 11
 static const uint16_t STATE_LIGHT_BIT = 4096; // bit 12
 
-class Fossibot : public esphome::ble_client::BLEClientNode, public Component {
+class Fbot : public esphome::ble_client::BLEClientNode, public Component {
  public:
   void setup() override;
   void loop() override;
@@ -118,7 +118,7 @@ class Fossibot : public esphome::ble_client::BLEClientNode, public Component {
   void publish_sensors();
 };
 
-}  // namespace fossibot
+}  // namespace fbot
 }  // namespace esphome
 
 #endif  // USE_ESP32

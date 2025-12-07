@@ -4,8 +4,8 @@
 # battery state, power readings, and control switches to Home Assistant.
 
 substitutions:
-  device_name: fossibot-battery
-  friendly_name: "Fossibot Battery"
+  device_name: fbot-battery
+  friendly_name: "Fbot Battery"
 
 esphome:
   name: ${device_name}
@@ -52,19 +52,19 @@ esp32_ble_tracker:
 
 # BLE Client configuration
 ble_client:
-  - mac_address: "AA:BB:CC:DD:EE:FF"  # Replace with your Fossibot MAC address
-    id: fossibot_ble_client
+  - mac_address: "AA:BB:CC:DD:EE:FF"  # Replace with your Fbot MAC address
+    id: fbot_ble_client
 
-# Configure the Fossibot component
-fossibot:
-  - ble_client_id: fossibot_ble_client
-    id: my_fossibot
+# Configure the Fbot component
+fbot:
+  - ble_client_id: fbot_ble_client
+    id: my_fbot
     polling_interval: 2s  # How often to poll for updates (default: 2s)
 
 # Binary sensors for connection and output states
 binary_sensor:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     connected:
       name: "${friendly_name} Connected"
     usb_active:
@@ -78,8 +78,8 @@ binary_sensor:
 
 # Sensors for battery and power readings
 sensor:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     battery_level:
       name: "${friendly_name} Battery"
       id: battery_percent
@@ -114,8 +114,8 @@ sensor:
 
 # Switches to control outputs
 switch:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     usb:
       name: "${friendly_name} USB Output"
       id: usb_switch

@@ -2,9 +2,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor
 from esphome.const import CONF_ID, DEVICE_CLASS_CONNECTIVITY
-from . import fossibot_ns, Fossibot, CONF_FOSSIBOT_ID
+from . import fbot_ns, Fbot, CONF_FBOT_ID
 
-DEPENDENCIES = ["fossibot"]
+DEPENDENCIES = ["fbot"]
 
 CONF_CONNECTED = "connected"
 CONF_USB_ACTIVE = "usb_active"
@@ -17,7 +17,7 @@ DEVICE_CLASS_LIGHT = "light"
 
 CONFIG_SCHEMA = cv.Schema(
     {
-        cv.GenerateID(CONF_FOSSIBOT_ID): cv.use_id(Fossibot),
+        cv.GenerateID(CONF_FBOT_ID): cv.use_id(Fbot),
         cv.Optional(CONF_CONNECTED): binary_sensor.binary_sensor_schema(
             device_class=DEVICE_CLASS_CONNECTIVITY,
         ),
@@ -37,7 +37,7 @@ CONFIG_SCHEMA = cv.Schema(
 )
 
 async def to_code(config):
-    parent = await cg.get_variable(config[CONF_FOSSIBOT_ID])
+    parent = await cg.get_variable(config[CONF_FBOT_ID])
     
     if CONF_CONNECTED in config:
         sens = await binary_sensor.new_binary_sensor(config[CONF_CONNECTED])

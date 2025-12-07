@@ -7,18 +7,18 @@ AUTO_LOAD = ["ble_client"]
 DEPENDENCIES = ["ble_client"]
 MULTI_CONF = True
 
-CONF_FOSSIBOT_ID = "fossibot_id"
+CONF_FBOT_ID = "fbot_id"
 CONF_POLLING_INTERVAL = "polling_interval"
 
-fossibot_ns = cg.esphome_ns.namespace("fossibot")
-Fossibot = fossibot_ns.class_(
-    "Fossibot", cg.Component, ble_client.BLEClientNode
+fbot_ns = cg.esphome_ns.namespace("fbot")
+Fbot = fbot_ns.class_(
+    "Fbot", cg.Component, ble_client.BLEClientNode
 )
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(Fossibot),
+            cv.GenerateID(): cv.declare_id(Fbot),
             cv.Optional(CONF_POLLING_INTERVAL, default="2s"): cv.positive_time_period_milliseconds,
         }
     )

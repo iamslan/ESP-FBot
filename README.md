@@ -29,7 +29,7 @@ Basically, any power station that works with the "BrightEMS" application. You no
 
 ## Installation
 
-1. Use the example configuration file `fossibot-example.yaml` as a starting point.
+1. Use the example configuration file `fbot-example.yaml` as a starting point.
 2. Update WiFi credentials and API encryption key.
 3. Flash to your ESP32 device.
 
@@ -41,8 +41,8 @@ All sensors are optional. Include only the ones you need:
 
 ```yaml
 sensor:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     battery_level:
       name: "Battery Level"
     input_power:
@@ -63,10 +63,10 @@ sensor:
 
 ```yaml
 binary_sensor:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     connected:
-      name: "Fossibot Connected"
+      name: "Fbot Connected"
     usb_active:
       name: "USB Active"
     dc_active:
@@ -81,8 +81,8 @@ binary_sensor:
 
 ```yaml
 switch:
-  - platform: fossibot
-    fossibot_id: my_fossibot
+  - platform: fbot
+    fbot_id: my_fbot
     usb:
       name: "USB Output"
     dc:

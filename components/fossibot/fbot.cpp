@@ -1,23 +1,23 @@
-#include "fossibot.h"
+#include "fbot.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 
 #ifdef USE_ESP32
 
 namespace esphome {
-namespace fossibot {
+namespace fbot {
 
-static const char *const TAG = "fossibot";
+static const char *const TAG = "fbot";
 
-void Fossibot::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up Fossibot...");
+void Fbot::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up Fbot...");
   this->write_handle_ = 0;
   this->notify_handle_ = 0;
   this->connected_ = false;
   this->characteristics_discovered_ = false;
 }
 
-void Fossibot::loop() {
+void Fbot::loop() {
   // Poll for data if connected
   if (this->connected_ && this->characteristics_discovered_) {
     uint32_t now = millis();
@@ -28,8 +28,8 @@ void Fossibot::loop() {
   }
 }
 
-void Fossibot::dump_config() {
-  ESP_LOGCONFIG(TAG, "Fossibot Battery:");
+void Fbot::dump_config() {
+  ESP_LOGCONFIG(TAG, "Fbot Battery:");
   ESP_LOGCONFIG(TAG, "  Polling interval: %ums", this->polling_interval_);
   LOG_SENSOR("  ", "Battery Percent", this->battery_percent_sensor_);
   LOG_SENSOR("  ", "Input Power", this->input_power_sensor_);
@@ -45,12 +45,12 @@ void Fossibot::dump_config() {
   LOG_BINARY_SENSOR("  ", "Light Active", this->light_active_binary_sensor_);
 }
 
-void Fossibot::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
+void Fbot::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                    esp_ble_gattc_cb_param_t *param) {
   switch (event) {
     case ESP_GATTC_OPEN_EVT: {
       if (param->open.status == ESP_GATT_OK) {
-        ESP_LOGI(TAG, "Connected to Fossibot");
+        ESP_LOGI(TAG, "Connected to Fbot");
         this->connected_ = true;
         this->update_connected_state(true);
       } else {
@@ -61,7 +61,7 @@ void Fossibot::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gat
     }
     
     case ESP_GATTC_DISCONNECT_EVT: {
-      ESP_LOGW(TAG, "Disconnected from Fossibot");
+      ESP_LOGW(TAG, "Disconnected from Fbot");
       this->connected_ = false;
       this->characteristics_discovered_ = false;
       this->update_connected_state(false);
@@ -130,7 +130,7 @@ void Fossibot::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gat
   }
 }
 
-uint16_t Fossibot::calculate_checksum(const uint8_t *data, size_t len) {
+uint16_t Fbot::calculate_checksum(const uint8_t *data, size_t len) {
   // CRC-16 Modbus variant (from WPA app)
   uint16_t crc = 0xFFFF;
   for (size_t i = 0; i < len; i++) {
@@ -146,7 +146,7 @@ uint16_t Fossibot::calculate_checksum(const uint8_t *data, size_t len) {
   return crc;
 }
 
-void Fossibot::generate_command_bytes(uint8_t address, uint16_t reg, uint16_t value, uint8_t *output) {
+void Fbot::generate_command_bytes(uint8_t address, uint16_t reg, uint16_t value, uint8_t *output) {
   // Build payload: [address, 6, reg_high, reg_low, value_high, value_low]
   output[0] = address;
   output[1] = 0x06;  // Function code for write
@@ -161,7 +161,7 @@ void Fossibot::generate_command_bytes(uint8_t address, uint16_t reg, uint16_t va
   output[7] = crc & 0xFF;
 }
 
-void Fossibot::send_read_request() {
+void Fbot::send_read_request() {
   if (!this->connected_ || !this->characteristics_discovered_) {
     return;
   }
@@ -184,7 +184,7 @@ void Fossibot::send_read_request() {
   }
 }
 
-void Fossibot::send_control_command(uint16_t reg, uint16_t value) {
+void Fbot::send_control_command(uint16_t reg, uint16_t value) {
   if (!this->connected_ || !this->characteristics_discovered_) {
     ESP_LOGW(TAG, "Cannot send command: not connected");
     return;
@@ -205,7 +205,7 @@ void Fossibot::send_control_command(uint16_t reg, uint16_t value) {
   }
 }
 
-uint16_t Fossibot::get_register(const uint8_t *data, uint16_t length, uint16_t reg_index) {
+uint16_t Fbot::get_register(const uint8_t *data, uint16_t length, uint16_t reg_index) {
   // Registers start at byte offset 6, each register is 2 bytes (big-endian)
   uint16_t offset = 6 + (reg_index * 2);
   if (offset + 1 >= length) {
@@ -214,7 +214,7 @@ uint16_t Fossibot::get_register(const uint8_t *data, uint16_t length, uint16_t r
   return (data[offset] << 8) | data[offset + 1];
 }
 
-void Fossibot::parse_notification(const uint8_t *data, uint16_t length) {
+void Fbot::parse_notification(const uint8_t *data, uint16_t length) {
   // Validate minimum length and header
   if (length < 6) {
     ESP_LOGW(TAG, "Notification too short: %d bytes", length);
@@ -284,7 +284,7 @@ void Fossibot::parse_notification(const uint8_t *data, uint16_t length) {
            battery_percent, input_watts, output_watts, usb_state, dc_state, ac_state);
 }
 
-void Fossibot::update_connected_state(bool state) {
+void Fbot::update_connected_state(bool state) {
   this->connected_ = state;
   if (this->connected_binary_sensor_ != nullptr) {
     this->connected_binary_sensor_->publish_state(state);
@@ -292,23 +292,23 @@ void Fossibot::update_connected_state(bool state) {
 }
 
 // Control methods
-void Fossibot::control_usb(bool state) {
+void Fbot::control_usb(bool state) {
   this->send_control_command(REG_USB_CONTROL, state ? 1 : 0);
 }
 
-void Fossibot::control_dc(bool state) {
+void Fbot::control_dc(bool state) {
   this->send_control_command(REG_DC_CONTROL, state ? 1 : 0);
 }
 
-void Fossibot::control_ac(bool state) {
+void Fbot::control_ac(bool state) {
   this->send_control_command(REG_AC_CONTROL, state ? 1 : 0);
 }
 
-void Fossibot::control_light(bool state) {
+void Fbot::control_light(bool state) {
   this->send_control_command(REG_LIGHT_CONTROL, state ? 1 : 0);
 }
 
-}  // namespace fossibot
+}  // namespace fbot
 }  // namespace esphome
 
 #endif  // USE_ESP32
