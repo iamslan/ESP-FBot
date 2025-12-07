@@ -1,4 +1,4 @@
-# ESP-Home Local Battery Interfaace
+# Home Assistant Power Station Interface
 
 ![ESP-FBot Image](https://raw.githubusercontent.com/Ylianst/ESP-FBot/refs/heads/main/docs/images/main.png)
 
