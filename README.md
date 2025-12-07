@@ -1,6 +1,6 @@
 # ESP-Home Battery Component for FOSSiBOT, SYDPOWER and AFERIY Batteries
 
-![ESP-FBot Image](https://github.com/Ylianst/ESP-IQ2020/assets/1319013/0ba0a473-8653-4b65-8338-052c8237fb5b)
+![ESP-FBot Image](https://raw.githubusercontent.com/Ylianst/ESP-FBot/refs/heads/main/docs/images/main.png)
 
 This is a HomeAssistant, ESP-Home custom component for locally monitoring and controlling battery systems via Bluetooth. Should work with the following batteries:
 
